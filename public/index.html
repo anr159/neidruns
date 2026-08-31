@@ -260,7 +260,7 @@ select{min-width:150px}
       <p id="libHint">Drag a clip onto a track. Click one to preview it.</p>
     </div>
     <div class="grid" id="grid"></div>
-    <p class="hint" style="margin-top:11px">Drag a clip's left or right edge to trim it. Select and press Delete to remove it. Space plays and pauses. Zoom with − and +, Ctrl and scroll, or 0 to fit; Z zooms to the selected clip.</p>
+    <p class="hint" style="margin-top:11px">Drag a clip's left or right edge to trim it. Select and press Delete to remove it. Space plays and pauses. Zoom with − and +, scroll, or 0 to fit; Z zooms to the selected clip. Shift+scroll to see more tracks.</p>
   </section>
 </div>
 
@@ -1030,13 +1030,18 @@ document.getElementById("zsel").addEventListener("click", () => {
 });
 
 lanesWrap.addEventListener("wheel", e => {
-  if (e.ctrlKey || e.metaKey) {                       // zoom at the cursor
-    e.preventDefault();
-    setZoom(pxs * Math.pow(1.0022, -e.deltaY), e.clientX);
-  } else if (e.shiftKey || Math.abs(e.deltaX) > Math.abs(e.deltaY)) {
-    e.preventDefault();                                // scrub sideways
-    lanesWrap.scrollLeft += (Math.abs(e.deltaX) > Math.abs(e.deltaY) ? e.deltaX : e.deltaY);
+  if (e.shiftKey && !(e.ctrlKey || e.metaKey)) {
+    e.preventDefault();                                // pan vertically between tracks
+    lanesWrap.scrollTop += e.deltaY;
+    return;
   }
+  if (!e.shiftKey && Math.abs(e.deltaX) > Math.abs(e.deltaY)) {
+    e.preventDefault();                                // trackpad horizontal swipe: scrub sideways
+    lanesWrap.scrollLeft += e.deltaX;
+    return;
+  }
+  e.preventDefault();                                  // plain scroll (or Ctrl/Cmd, or pinch): zoom at cursor
+  setZoom(pxs * Math.pow(1.0022, -e.deltaY), e.clientX);
 }, { passive: false });
 
 /* keep the playhead on screen while playing */

@@ -3,12 +3,14 @@
 An audio clip sequencer, deployed on Netlify with a shared sequence library.
 
     public/index.html               the app
+    public/audio/                   the mp3 clips
     netlify/functions/sequences.mjs the save/load API
     netlify.toml                    build config
     package.json                    one dependency, @netlify/blobs
 
-The mp3s are not in this repo. The app fetches them from the URLs listed in
-`AUDIO_BASES` near the top of the script in `public/index.html`.
+The mp3s are bundled in `public/audio/`. The app also tries a couple of CDN
+mirrors first, in case that's faster; the list is `AUDIO_BASES` near the top
+of the script in `public/index.html`.
 
 ## Deploying
 
