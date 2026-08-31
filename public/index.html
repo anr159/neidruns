@@ -281,7 +281,7 @@ const AUDIO_BASES = [
 let activeBase = null;   // the one that worked, tried first from then on
 
 const CLIPS = [
-  ["fizgets_nepala-001.mp3",  16.536],
+  ["fizgets_nepala-001.mp3",  16.536, "Sākums"],
   ["fizgets_nepala-002.mp3",  44.539],
   ["fizgets_nepala-003.mp3",  95.033],
   ["fizgets_nepala-004.mp3",  25.548],
@@ -295,9 +295,9 @@ const CLIPS = [
   ["fizgets_nepala-012.mp3", 124.029],
   ["fizgets_nepala-013.mp3", 102.165],
   ["fizgets_nepala-014.mp3", 172.904],
-].map(([file, dur], i) => ({
+].map(([file, dur, name], i) => ({
   i, file, dur,
-  label: "Clip " + String(i + 1).padStart(2, "0"),
+  label: name || "Clip " + String(i + 1).padStart(2, "0"),
   hue: (18 + i * 26) % 360,
 }));
 
