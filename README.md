@@ -42,19 +42,21 @@ a WAV.
 | `−` `+` | Zoom out / in |
 | `0` | Fit everything |
 | `Z` | Zoom to the selected clip |
-| `Ctrl` + scroll | Zoom at the pointer |
-| `Shift` + scroll | Pan sideways |
+| scroll | Zoom at the pointer (`Ctrl`/pinch also works) |
+| `Shift` + scroll | Pan vertically between tracks |
+| trackpad horizontal swipe | Pan sideways |
 
 ---
 
 ## Project layout
 
     public/index.html                 the entire app
+    public/audio/                     the mp3 clips
     netlify/functions/sequences.mjs   shared-sequence API
     netlify.toml                      build config
     package.json                      one dependency, @netlify/blobs
 
-The mp3s are not in this repository.
+The mp3s are bundled in `public/audio/`.
 
 ---
 
@@ -88,11 +90,12 @@ you can select the mp3s from disk and keep working.
 
 ### Changing the clips
 
-The clip list is hardcoded in the `CLIPS` array, as filename and duration pairs.
-Add, remove or rename entries there. The durations are only estimates used to
-draw the library before anything is decoded — the app measures each file when it
-loads and corrects itself, including fixing up anything already on the timeline
-whose length no longer fits.
+The clip list is hardcoded in the `CLIPS` array, as filename and duration pairs,
+plus an optional third element to override the display label (otherwise it's
+"Clip 01", "Clip 02", …). Add, remove or rename entries there. The durations
+are only estimates used to draw the library before anything is decoded — the
+app measures each file when it loads and corrects itself, including fixing up
+anything already on the timeline whose length no longer fits.
 
 ---
 
