@@ -52,6 +52,10 @@ stops when you undo or redo, since the clips underneath may have changed.
 **Exporting.** "Export mix" renders the arrangement offline and downloads it as
 a WAV.
 
+**Dark mode.** The ☾/☀ button top right switches themes. It follows your
+system preference until you click it, after which your choice is remembered
+in this browser.
+
 ### Keyboard
 
 | Key | Action |

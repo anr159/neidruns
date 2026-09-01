@@ -18,9 +18,42 @@
   --rule-soft:#DEDBD3;
   --live:#2E6B4F;
   --danger:#9C3B2E;
+  --hover:#E7E4DC;
+  --primary-hover:#000;
+  --notice-bg:#F6EDEA;
   --track-h:74px;
   --heads-w:176px;
   --r:7px;
+}
+@media (prefers-color-scheme:dark){
+  :root:not([data-theme="light"]){
+    --paper:#1A1917;
+    --surface:#242320;
+    --surface-2:#2C2A26;
+    --ink:#EDEAE2;
+    --ink-2:#A39C8E;
+    --rule:#3E3B35;
+    --rule-soft:#2F2D28;
+    --live:#3F9270;
+    --danger:#C2594A;
+    --hover:#332F29;
+    --primary-hover:#fff;
+    --notice-bg:#2E211E;
+  }
+}
+:root[data-theme="dark"]{
+  --paper:#1A1917;
+  --surface:#242320;
+  --surface-2:#2C2A26;
+  --ink:#EDEAE2;
+  --ink-2:#A39C8E;
+  --rule:#3E3B35;
+  --rule-soft:#2F2D28;
+  --live:#3F9270;
+  --danger:#C2594A;
+  --hover:#332F29;
+  --primary-hover:#fff;
+  --notice-bg:#2E211E;
 }
 *{box-sizing:border-box}
 html,body{height:100%}
@@ -136,9 +169,9 @@ button{cursor:pointer}
   border:1px solid var(--rule);background:var(--surface-2);border-radius:5px;
   padding:6px 12px;font-size:13px;font-weight:500;
 }
-.btn:hover{background:#E7E4DC}
+.btn:hover{background:var(--hover)}
 .btn.primary{background:var(--ink);border-color:var(--ink);color:var(--surface)}
-.btn.primary:hover{background:#000}
+.btn.primary:hover{background:var(--primary-hover)}
 .btn.live{background:var(--live);border-color:var(--live);color:#fff}
 .btn.icon{width:34px;padding:6px 0;display:grid;place-items:center}
 .btn:disabled{opacity:.4;cursor:not-allowed}
@@ -201,12 +234,15 @@ select{min-width:150px}
 
 /* ---------- notice ---------- */
 .notice{
-  padding:11px 14px;border:1px solid var(--danger);background:#F6EDEA;border-radius:var(--r);
+  padding:11px 14px;border:1px solid var(--danger);background:var(--notice-bg);border-radius:var(--r);
   font-size:13px;display:none;gap:10px;align-items:center;flex-wrap:wrap;
 }
 .notice.on{display:flex}
 .notice strong{font-weight:600}
 .hint{font-size:12px;color:var(--ink-2);margin:0}
+.lib-foot{margin-top:11px;display:flex;align-items:flex-end;justify-content:space-between;gap:16px}
+.lib-foot .hint{margin-top:0}
+.brand-logo{height:58px;width:auto;flex-shrink:0}
 
 @media (max-width:860px){
   :root{--heads-w:132px}
@@ -226,6 +262,7 @@ select{min-width:150px}
     <label class="master">Master
       <input type="range" id="master" min="0" max="1.2" step="0.01" value="0.9">
     </label>
+    <button class="btn icon" id="theme" title="Switch to dark mode" aria-pressed="false">☾</button>
   </header>
 
   <div class="notice" id="notice">
@@ -287,12 +324,46 @@ select{min-width:150px}
       <p id="libHint">Drag a clip onto a track. Click one to preview it.</p>
     </div>
     <div class="grid" id="grid"></div>
-    <p class="hint" style="margin-top:11px">Drag a clip's left or right edge to trim it. Shift+click to select several clips at once. Select and press Delete to remove, Ctrl+D to duplicate right after the original(s), or Ctrl+C/Ctrl+V to copy and paste at the playhead. Click a track's name on the left to make it the paste target, so you can paste onto a different track than you copied from. Toggle the razor (✂ or T) and click a clip to cut it into two there. Ctrl+Z undoes, Ctrl+Shift+Z (or Ctrl+Y) redoes. Space plays and pauses. Zoom with − and +, scroll, or 0 to fit; Z zooms to the selection. Shift+scroll to see more tracks.</p>
+    <div class="lib-foot">
+      <p class="hint">Drag a clip's left or right edge to trim it. Shift+click to select several clips at once. Select and press Delete to remove, Ctrl+D to duplicate right after the original(s), or Ctrl+C/Ctrl+V to copy and paste at the playhead. Click a track's name on the left to make it the paste target, so you can paste onto a different track than you copied from. Toggle the razor (✂ or T) and click a clip to cut it into two there. Ctrl+Z undoes, Ctrl+Shift+Z (or Ctrl+Y) redoes. Space plays and pauses. Zoom with − and +, scroll, or 0 to fit; Z zooms to the selection. Shift+scroll to see more tracks.</p>
+      <img class="brand-logo" src="images/pissbucket_logo.png" alt="Pissbucket Solutions">
+    </div>
   </section>
 </div>
 
 <script>
 "use strict";
+
+/* ============ theme ============ */
+(function () {
+  const THEME_KEY = "audiotimeline:theme";
+  const getStored = () => { try { return localStorage.getItem(THEME_KEY); } catch (_) { return null; } };
+  const setStored = v => { try { localStorage.setItem(THEME_KEY, v); } catch (_) {} };
+  const darkQuery = window.matchMedia ? window.matchMedia("(prefers-color-scheme: dark)") : null;
+  const isDark = () => {
+    const stored = getStored();
+    if (stored === "dark") return true;
+    if (stored === "light") return false;
+    return !!(darkQuery && darkQuery.matches);
+  };
+  function sync() {
+    const btn = document.getElementById("theme"); if (!btn) return;
+    const dark = isDark();
+    btn.textContent = dark ? "☀" : "☾";
+    btn.setAttribute("aria-pressed", dark);
+    btn.title = dark ? "Switch to light mode" : "Switch to dark mode";
+  }
+  const stored = getStored();
+  if (stored === "dark" || stored === "light") document.documentElement.setAttribute("data-theme", stored);
+  sync();
+  document.getElementById("theme").addEventListener("click", () => {
+    const next = isDark() ? "light" : "dark";
+    document.documentElement.setAttribute("data-theme", next);
+    setStored(next);
+    sync();
+  });
+  if (darkQuery) darkQuery.addEventListener("change", () => { if (!getStored()) sync(); });
+})();
 
 /* ============ clip manifest ============ */
 
