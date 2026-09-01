@@ -1,0 +1,21 @@
+{
+	"dbConnectionString": "postgres://localhost:61162/postgres",
+	"geolocation": {
+		"data": {
+			"city": "Riga",
+			"country": {
+				"code": "LV",
+				"name": "Latvia"
+			},
+			"subdivision": {
+				"code": "RIX",
+				"name": "Riga"
+			},
+			"timezone": "Europe/Riga",
+			"latitude": 56.9473,
+			"longitude": 24.0979,
+			"postalCode": "LV-1001"
+		},
+		"timestamp": 1788282817630
+	}
+}
