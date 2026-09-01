@@ -6,7 +6,7 @@
 <title>Neidrūns</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Archivo:wght@400;500;600&family=Newsreader:opsz,wght@6..72,400;6..72,500&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wght@400;500;600&family=Goldman:wght@400;700&display=swap" rel="stylesheet">
 <style>
 :root{
   --paper:#E7E4DD;
@@ -18,9 +18,45 @@
   --rule-soft:#DEDBD3;
   --live:#2E6B4F;
   --danger:#9C3B2E;
+  --hover:#E7E4DC;
+  --primary-hover:#000;
+  --notice-bg:#F6EDEA;
+  --wordmark:var(--ink);
   --track-h:74px;
   --heads-w:176px;
   --r:7px;
+}
+@media (prefers-color-scheme:dark){
+  :root:not([data-theme="light"]){
+    --paper:#1A1917;
+    --surface:#242320;
+    --surface-2:#2C2A26;
+    --ink:#EDEAE2;
+    --ink-2:#A39C8E;
+    --rule:#3E3B35;
+    --rule-soft:#2F2D28;
+    --live:#3F9270;
+    --danger:#C2594A;
+    --hover:#332F29;
+    --primary-hover:#fff;
+    --notice-bg:#2E211E;
+    --wordmark:#F7BF04;
+  }
+}
+:root[data-theme="dark"]{
+  --paper:#1A1917;
+  --surface:#242320;
+  --surface-2:#2C2A26;
+  --ink:#EDEAE2;
+  --ink-2:#A39C8E;
+  --rule:#3E3B35;
+  --rule-soft:#2F2D28;
+  --live:#3F9270;
+  --danger:#C2594A;
+  --hover:#332F29;
+  --primary-hover:#fff;
+  --notice-bg:#2E211E;
+  --wordmark:#F7BF04;
 }
 *{box-sizing:border-box}
 html,body{height:100%}
@@ -41,7 +77,7 @@ button{cursor:pointer}
 
 /* ---------- masthead ---------- */
 .masthead{display:flex;align-items:baseline;gap:14px;flex-wrap:wrap}
-.wordmark{font-family:Newsreader,Georgia,"Times New Roman",serif;font-size:31px;line-height:1.05;letter-spacing:.1px;font-optical-sizing:auto}
+.wordmark{font-family:Goldman,"Arial Black",Arial,sans-serif;font-size:28px;line-height:1.05;letter-spacing:.1px;color:var(--wordmark)}
 .setname{color:var(--ink-2);font-size:13px}
 .masthead .spacer{flex:1}
 .master{display:flex;align-items:center;gap:10px;color:var(--ink-2);font-size:13px}
@@ -68,7 +104,9 @@ button{cursor:pointer}
 .head{
   height:var(--track-h);border-bottom:1px solid var(--rule-soft);
   padding:9px 12px;display:flex;flex-direction:column;gap:6px;justify-content:center;
+  cursor:pointer;box-shadow:inset 2px 0 0 transparent;
 }
+.head.sel{background:rgba(46,107,79,.1);box-shadow:inset 2px 0 0 var(--live)}
 .head-top{display:flex;align-items:center;gap:8px}
 .head-name{font-size:12px;font-weight:500;flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .mute{
@@ -76,11 +114,18 @@ button{cursor:pointer}
   border-radius:4px;width:22px;height:20px;font-size:11px;font-weight:600;line-height:1;padding:0;
 }
 .mute[aria-pressed="true"]{background:var(--danger);border-color:var(--danger);color:#fff}
+.trk-x{
+  border:1px solid var(--rule);background:transparent;color:var(--ink-2);
+  border-radius:4px;width:20px;height:20px;font-size:13px;line-height:1;padding:0;flex-shrink:0;
+}
+.trk-x:hover{background:var(--danger);border-color:var(--danger);color:#fff}
+.trk-x:disabled{opacity:.35;cursor:not-allowed;background:transparent;color:var(--ink-2)}
 
 .lanes-wrap{overflow:auto;position:relative;background:var(--surface)}
 .lanes{position:relative;min-height:100%}
 .lane{height:var(--track-h);border-bottom:1px solid var(--rule-soft);position:relative;z-index:1}
 .lane.alt{background:rgba(0,0,0,.018)}
+.lane.trksel{background:rgba(46,107,79,.05)}
 .lane.hot{background:rgba(46,107,79,.09)}
 .gridlayer{position:absolute;inset:0;z-index:0;pointer-events:none}
 .gridline{position:absolute;top:0;bottom:0;width:1px;background:var(--rule-soft)}
@@ -100,8 +145,10 @@ button{cursor:pointer}
 .item.dragging{cursor:grabbing;opacity:.85;z-index:8}
 .item canvas{display:block;position:absolute;top:0;left:0}
 .item-label{
-  position:absolute;left:6px;top:3px;right:22px;font-size:11px;font-weight:600;
-  color:rgba(0,0,0,.7);pointer-events:none;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
+  position:absolute;left:6px;top:4px;max-width:calc(100% - 28px);font-size:11px;font-weight:600;
+  color:rgba(0,0,0,.75);pointer-events:none;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
+  background:rgba(255,255,255,.72);padding:2px 8px;border-radius:999px;
+  box-shadow:0 1px 1px rgba(0,0,0,.06);
 }
 .item-x{
   position:absolute;right:3px;top:3px;width:16px;height:16px;border:0;padding:0;
@@ -113,6 +160,7 @@ button{cursor:pointer}
 .grip{position:absolute;top:0;bottom:0;width:8px;cursor:ew-resize;touch-action:none}
 .grip.l{left:0} .grip.r{right:0}
 .item:hover .grip{background:rgba(0,0,0,.13)}
+.lanes.razor .item{cursor:crosshair}
 
 /* ---------- control bar ---------- */
 .bar{display:flex;gap:10px;flex-wrap:wrap;align-items:stretch}
@@ -124,9 +172,9 @@ button{cursor:pointer}
   border:1px solid var(--rule);background:var(--surface-2);border-radius:5px;
   padding:6px 12px;font-size:13px;font-weight:500;
 }
-.btn:hover{background:#E7E4DC}
+.btn:hover{background:var(--hover)}
 .btn.primary{background:var(--ink);border-color:var(--ink);color:var(--surface)}
-.btn.primary:hover{background:#000}
+.btn.primary:hover{background:var(--primary-hover)}
 .btn.live{background:var(--live);border-color:var(--live);color:#fff}
 .btn.icon{width:34px;padding:6px 0;display:grid;place-items:center}
 .btn:disabled{opacity:.4;cursor:not-allowed}
@@ -163,8 +211,19 @@ select{min-width:150px}
 }
 .tile:hover{border-color:rgba(0,0,0,.4)}
 .tile canvas{display:block;width:100%;height:100%}
-.tile-meta{position:absolute;inset:auto 7px 5px 7px;display:flex;justify-content:space-between;font-size:11px;font-weight:600;color:rgba(0,0,0,.72);pointer-events:none}
-.tile-name{position:absolute;left:7px;top:5px;font-size:11px;font-weight:600;color:rgba(0,0,0,.72);pointer-events:none}
+.tile-meta{position:absolute;inset:auto 7px 5px 7px;display:flex;justify-content:flex-end;pointer-events:none}
+.tile-meta span:last-child{
+  font-size:11px;font-weight:600;color:rgba(0,0,0,.75);
+  background:rgba(255,255,255,.72);padding:2px 8px;border-radius:999px;
+  box-shadow:0 1px 1px rgba(0,0,0,.06);
+}
+.tile-name{
+  position:absolute;left:6px;top:5px;max-width:calc(100% - 12px);
+  font-size:11px;font-weight:600;color:rgba(0,0,0,.75);
+  background:rgba(255,255,255,.72);padding:2px 8px;border-radius:999px;
+  overflow:hidden;text-overflow:ellipsis;white-space:nowrap;
+  box-shadow:0 1px 1px rgba(0,0,0,.06);pointer-events:none;
+}
 .tile.playing{box-shadow:inset 0 0 0 2px var(--live)}
 .tile .prog{position:absolute;left:0;bottom:0;height:2px;background:rgba(0,0,0,.35);width:0}
 
@@ -178,12 +237,15 @@ select{min-width:150px}
 
 /* ---------- notice ---------- */
 .notice{
-  padding:11px 14px;border:1px solid var(--danger);background:#F6EDEA;border-radius:var(--r);
+  padding:11px 14px;border:1px solid var(--danger);background:var(--notice-bg);border-radius:var(--r);
   font-size:13px;display:none;gap:10px;align-items:center;flex-wrap:wrap;
 }
 .notice.on{display:flex}
 .notice strong{font-weight:600}
 .hint{font-size:12px;color:var(--ink-2);margin:0}
+.lib-foot{margin-top:11px;display:flex;align-items:center;justify-content:space-between;gap:16px}
+.lib-foot .hint{margin-top:0}
+.brand-logo{height:46px;width:auto;flex-shrink:0}
 
 @media (max-width:860px){
   :root{--heads-w:132px}
@@ -203,6 +265,7 @@ select{min-width:150px}
     <label class="master">Master
       <input type="range" id="master" min="0" max="1.2" step="0.01" value="0.9">
     </label>
+    <button class="btn icon" id="theme" title="Switch to dark mode" aria-pressed="false">☾</button>
   </header>
 
   <div class="notice" id="notice">
@@ -226,8 +289,12 @@ select{min-width:150px}
       <button class="btn icon" id="loop" title="Loop" aria-pressed="false">↻</button>
       <span class="readout"><b id="tNow">0:00</b> / <span id="tEnd">0:00</span></span>
       <span class="vsep"></span>
+      <button class="btn icon" id="undo" title="Undo (Ctrl+Z)" disabled>↶</button>
+      <button class="btn icon" id="redo" title="Redo (Ctrl+Shift+Z / Ctrl+Y)" disabled>↷</button>
+      <span class="vsep"></span>
       <label class="tog"><input type="checkbox" id="snap" checked> Snap</label>
       <label class="tog"><input type="checkbox" id="follow" checked> Follow</label>
+      <button class="btn icon" id="razor" title="Razor: click a clip to cut it there (T)" aria-pressed="false">✂</button>
       <span class="vsep"></span>
       <span class="zoom">
         <button class="btn icon" id="zout" title="Zoom out (−)">−</button>
@@ -260,12 +327,48 @@ select{min-width:150px}
       <p id="libHint">Drag a clip onto a track. Click one to preview it.</p>
     </div>
     <div class="grid" id="grid"></div>
-    <p class="hint" style="margin-top:11px">Drag a clip's left or right edge to trim it. Select and press Delete to remove it. Space plays and pauses. Zoom with − and +, scroll, or 0 to fit; Z zooms to the selected clip. Shift+scroll to see more tracks.</p>
+    <div class="lib-foot">
+      <p class="hint">Drag a clip's left or right edge to trim it. Shift+click to select several clips at once. Select and press Delete to remove, Ctrl+D to duplicate right after the original(s), or Ctrl+C/Ctrl+V to copy and paste at the playhead. Click a track's name on the left to make it the paste target, so you can paste onto a different track than you copied from. Toggle the razor (✂ or T) and click a clip to cut it into two there. Ctrl+Z undoes, Ctrl+Shift+Z (or Ctrl+Y) redoes. Space plays and pauses. Zoom with − and +, scroll, or 0 to fit; Z zooms to the selection. Shift+scroll to see more tracks.</p>
+      <img class="brand-logo" src="images/pissbucket_logo.png" width="439" height="134" alt="Pissbucket Solutions">
+    </div>
   </section>
 </div>
 
 <script>
 "use strict";
+
+/* ============ theme ============ */
+(function () {
+  const THEME_KEY = "audiotimeline:theme";
+  const getStored = () => { try { return localStorage.getItem(THEME_KEY); } catch (_) { return null; } };
+  const setStored = v => { try { localStorage.setItem(THEME_KEY, v); } catch (_) {} };
+  const darkQuery = window.matchMedia ? window.matchMedia("(prefers-color-scheme: dark)") : null;
+  const isDark = () => {
+    const stored = getStored();
+    if (stored === "dark") return true;
+    if (stored === "light") return false;
+    return !!(darkQuery && darkQuery.matches);
+  };
+  function sync() {
+    const btn = document.getElementById("theme"); if (!btn) return;
+    const dark = isDark();
+    btn.textContent = dark ? "☀" : "☾";
+    btn.setAttribute("aria-pressed", dark);
+    btn.title = dark ? "Switch to light mode" : "Switch to dark mode";
+    const logo = document.querySelector(".brand-logo");
+    if (logo) logo.src = dark ? "images/pissbucket_logo_dark_version.png" : "images/pissbucket_logo.png";
+  }
+  const stored = getStored();
+  if (stored === "dark" || stored === "light") document.documentElement.setAttribute("data-theme", stored);
+  sync();
+  document.getElementById("theme").addEventListener("click", () => {
+    const next = isDark() ? "light" : "dark";
+    document.documentElement.setAttribute("data-theme", next);
+    setStored(next);
+    sync();
+  });
+  if (darkQuery) darkQuery.addEventListener("change", () => { if (!getStored()) sync(); });
+})();
 
 /* ============ clip manifest ============ */
 
@@ -286,15 +389,15 @@ const CLIPS = [
   ["fizgets_nepala-003.mp3",  95.033],
   ["fizgets_nepala-004.mp3",  25.548],
   ["fizgets_nepala-005.mp3",  69.538],
-  ["fizgets_nepala-006.mp3",  92.029],
+  ["fizgets_nepala-006.mp3",  92.029, "Maris Olte"],
   ["fizgets_nepala-007.mp3",  50.051],
   ["fizgets_nepala-008.mp3",  38.348],
   ["fizgets_nepala-009.mp3",  60.343],
-  ["fizgets_nepala-010.mp3",  98.038],
+  ["fizgets_nepala-010.mp3",  98.038, "Robopazuzu"],
   ["fizgets_nepala-011.mp3", 101.538],
   ["fizgets_nepala-012.mp3", 124.029],
   ["fizgets_nepala-013.mp3", 102.165],
-  ["fizgets_nepala-014.mp3", 172.904],
+  ["fizgets_nepala-014.mp3", 172.904, "Weezer"],
 ].map(([file, dur, name], i) => ({
   i, file, dur,
   label: name || "Clip " + String(i + 1).padStart(2, "0"),
@@ -310,9 +413,20 @@ let items = [];
 let uid = 1;
 let pxs = 3;                 // pixels per second
 let playhead = 0;
-let selected = null;
+let selected = new Set();       // ids of selected items
 let looping = false;
+let razorMode = false;
+let clipboard = [];
+let selectedTrack = null;   // paste destination override; null = use each clip's own track
+let nudged = false;         // an arrow-key nudge happened since the last commit
 const LANE_PAD = 0;
+
+function selectOnly(id) { selected = new Set(id != null ? [id] : []); }
+function selectedRange() {
+  const its = [...selected].map(id => items.find(i => i.id === id)).filter(Boolean);
+  if (!its.length) return null;
+  return { start: Math.min(...its.map(i => i.start)), end: Math.max(...its.map(i => i.start + i.dur)) };
+}
 
 function newTrack(n) { return { name: "Track " + n, gain: 0.85, mute: false }; }
 tracks = [1, 2, 3, 4].map(newTrack);
@@ -618,17 +732,25 @@ function renderHeads() {
   heads.innerHTML = "";
   tracks.forEach((t, i) => {
     const d = document.createElement("div");
-    d.className = "head";
+    d.className = "head" + (selectedTrack === i ? " sel" : "");
+    d.title = "Click to set as the paste target";
     d.innerHTML =
       '<div class="head-top"><span class="head-name">' + t.name + '</span>' +
-      '<button class="mute" aria-pressed="' + t.mute + '" title="Mute this track">M</button></div>' +
+      '<button class="mute" aria-pressed="' + t.mute + '" title="Mute this track">M</button>' +
+      '<button class="trk-x" title="Remove this track"' + (tracks.length <= 1 ? " disabled" : "") + '>×</button></div>' +
       '<input type="range" min="0" max="1.2" step="0.01" value="' + t.gain + '" aria-label="' + t.name + ' volume">';
-    d.querySelector(".mute").addEventListener("click", e => {
-      t.mute = !t.mute; e.currentTarget.setAttribute("aria-pressed", t.mute); syncGains(); persistCurrent();
+    d.addEventListener("click", e => {
+      if (e.target.closest(".mute, .trk-x, input")) return;
+      selectTrack(i);
     });
+    d.querySelector(".mute").addEventListener("click", e => {
+      t.mute = !t.mute; e.currentTarget.setAttribute("aria-pressed", t.mute); syncGains(); persistCurrent(); commitHistory();
+    });
+    d.querySelector(".trk-x").addEventListener("click", () => removeTrack(i));
     d.querySelector("input").addEventListener("input", e => {
       t.gain = +e.target.value; syncGains(); persistCurrent();
     });
+    d.querySelector("input").addEventListener("change", () => commitHistory());
     heads.appendChild(d);
   });
 }
@@ -639,7 +761,7 @@ function renderLanes() {
   lanes.style.height = (tracks.length * TRACK_H) + "px";
   tracks.forEach((_, i) => {
     const l = document.createElement("div");
-    l.className = "lane" + (i % 2 ? " alt" : "");
+    l.className = "lane" + (i % 2 ? " alt" : "") + (selectedTrack === i ? " trksel" : "");
     l.dataset.track = i;
     lanes.appendChild(l);
   });
@@ -647,12 +769,21 @@ function renderLanes() {
 
 function laneEl(i) { return lanes.querySelector('.lane[data-track="' + i + '"]'); }
 
+function markTrackSelection() {
+  [...heads.children].forEach((d, i) => d.classList.toggle("sel", selectedTrack === i));
+  lanes.querySelectorAll(".lane").forEach(l => l.classList.toggle("trksel", +l.dataset.track === selectedTrack));
+}
+function selectTrack(i) {
+  selectedTrack = selectedTrack === i ? null : i;
+  markTrackSelection();
+}
+
 function renderItems() {
   lanes.querySelectorAll(".item").forEach(n => n.remove());
   items.forEach(it => {
     const c = CLIPS[it.clip];
     const el = document.createElement("div");
-    el.className = "item" + (selected === it.id ? " sel" : "");
+    el.className = "item" + (selected.has(it.id) ? " sel" : "");
     el.dataset.id = it.id;
     el.style.left = (it.start * pxs) + "px";
     el.style.width = Math.max(10, it.dur * pxs) + "px";
@@ -756,7 +887,7 @@ grid.addEventListener("keydown", e => {
 
 /* --- items on the timeline --- */
 function markSelection() {
-  lanes.querySelectorAll(".item").forEach(n => n.classList.toggle("sel", +n.dataset.id === selected));
+  lanes.querySelectorAll(".item").forEach(n => n.classList.toggle("sel", selected.has(+n.dataset.id)));
 }
 
 lanes.addEventListener("pointerdown", e => {
@@ -768,7 +899,18 @@ lanes.addEventListener("pointerdown", e => {
   }
   const el = e.target.closest(".item"); if (!el) return;
   const it = items.find(i => i.id === +el.dataset.id); if (!it) return;
-  selected = it.id;
+  if (razorMode) {
+    e.preventDefault();
+    splitItemAt(it.id, timeAt(e.clientX));
+    return;
+  }
+  if (e.shiftKey) {
+    e.preventDefault();
+    if (selected.has(it.id)) selected.delete(it.id); else selected.add(it.id);
+    markSelection();
+    return;
+  }
+  selectOnly(it.id);
   markSelection();
   const grip = e.target.classList.contains("grip") ? (e.target.classList.contains("l") ? "l" : "r") : null;
   el.setPointerCapture(e.pointerId);
@@ -859,6 +1001,7 @@ window.addEventListener("pointerup", e => {
   d.el.style.transform = "";
   lanes.querySelectorAll(".lane").forEach(l => l.classList.remove("hot"));
   renderRuler(); renderItems(); renderLanes2(); renderTimes(); persistCurrent();
+  if (d.moved) commitHistory();
 });
 
 /* re-fit the lane container after a move without nuking the DOM */
@@ -871,14 +1014,78 @@ function renderLanes2() {
 function addItem(clip, track, start) {
   const it = { id: uid++, clip, track, start, offset: 0, dur: CLIPS[clip].dur, pending: !buffers.has(clip) };
   items.push(it);
-  selected = it.id;
-  renderRuler(); renderItems(); renderLanes2(); renderTimes(); persistCurrent();
+  selectOnly(it.id);
+  renderRuler(); renderItems(); renderLanes2(); renderTimes(); persistCurrent(); commitHistory();
 }
 function removeItem(id) {
   items = items.filter(i => i.id !== id);
-  if (selected === id) selected = null;
-  renderRuler(); renderItems(); renderLanes2(); renderTimes(); persistCurrent();
+  selected.delete(id);
+  renderRuler(); renderItems(); renderLanes2(); renderTimes(); persistCurrent(); commitHistory();
 }
+function removeSelected() {
+  if (!selected.size) return;
+  const ids = selected;
+  items = items.filter(i => !ids.has(i.id));
+  selected = new Set();
+  renderRuler(); renderItems(); renderLanes2(); renderTimes(); persistCurrent(); commitHistory();
+}
+function copySelected() {
+  if (!selected.size) return;
+  clipboard = [...selected].map(id => items.find(i => i.id === id)).filter(Boolean)
+    .map(it => ({ clip: it.clip, track: it.track, start: it.start, offset: it.offset, dur: it.dur }));
+}
+function pasteClipboard() {
+  if (!clipboard.length) return;
+  const minStart = Math.min(...clipboard.map(c => c.start));
+  const minTrack = Math.min(...clipboard.map(c => c.track));
+  const trackShift = selectedTrack != null ? selectedTrack - minTrack : 0;
+  const copies = clipboard.map(c => ({
+    id: uid++, clip: c.clip,
+    track: Math.min(tracks.length - 1, Math.max(0, c.track + trackShift)),
+    start: Math.max(0, playhead + (c.start - minStart)),
+    offset: c.offset, dur: c.dur, pending: !buffers.has(c.clip),
+  }));
+  items.push(...copies);
+  selected = new Set(copies.map(c => c.id));
+  renderRuler(); renderItems(); renderLanes2(); renderTimes(); persistCurrent(); commitHistory();
+}
+function duplicateSelected() {
+  if (!selected.size) return;
+  const copies = [...selected].map(id => {
+    const it = items.find(i => i.id === id); if (!it) return null;
+    return { id: uid++, clip: it.clip, track: it.track, start: it.start + it.dur, offset: it.offset, dur: it.dur, pending: it.pending };
+  }).filter(Boolean);
+  if (!copies.length) return;
+  items.push(...copies);
+  selected = new Set(copies.map(c => c.id));
+  renderRuler(); renderItems(); renderLanes2(); renderTimes(); persistCurrent(); commitHistory();
+}
+
+/* razor: cut one clip into two at time t, keeping each half's trim intact */
+const RAZOR_MIN = 0.1;
+function splitItemAt(id, t) {
+  const it = items.find(i => i.id === id); if (!it) return null;
+  if (it.dur < RAZOR_MIN * 2) return null;
+  const cut = Math.max(it.start + RAZOR_MIN, Math.min(t, it.start + it.dur - RAZOR_MIN));
+  const leftDur = cut - it.start;
+  const right = {
+    id: uid++, clip: it.clip, track: it.track,
+    start: cut, offset: it.offset + leftDur, dur: it.dur - leftDur, pending: it.pending,
+  };
+  it.dur = leftDur;
+  items.push(right);
+  selectOnly(right.id);
+  renderRuler(); renderItems(); renderLanes2(); renderTimes(); persistCurrent(); commitHistory();
+  return right;
+}
+
+function setRazor(v) {
+  razorMode = v;
+  document.getElementById("razor").setAttribute("aria-pressed", razorMode);
+  document.getElementById("razor").classList.toggle("live", razorMode);
+  lanes.classList.toggle("razor", razorMode);
+}
+document.getElementById("razor").addEventListener("click", () => setRazor(!razorMode));
 
 /* ============ ruler scrubbing ============ */
 function scrubTo(clientX) {
@@ -896,7 +1103,7 @@ ruler.addEventListener("pointerdown", e => {
 });
 lanes.addEventListener("pointerdown", e => {
   if (e.target.closest(".item")) return;
-  selected = null; markSelection();
+  selected.clear(); markSelection();
   playhead = Math.max(0, timeAt(e.clientX));
   renderPlayhead();
 });
@@ -1025,8 +1232,8 @@ document.getElementById("zin").addEventListener("click", () => setZoom(pxs * 1.6
 document.getElementById("zout").addEventListener("click", () => setZoom(pxs / 1.6));
 document.getElementById("zfit").addEventListener("click", () => zoomToRange(0, contentEnd() || 60, 0.02));
 document.getElementById("zsel").addEventListener("click", () => {
-  const it = items.find(i => i.id === selected);
-  if (it) zoomToRange(it.start, it.start + it.dur, 0.15);
+  const r = selectedRange();
+  if (r) zoomToRange(r.start, r.end, 0.15);
 });
 
 lanesWrap.addEventListener("wheel", e => {
@@ -1054,14 +1261,31 @@ function followPlayhead() {
   }
 }
 
+function removeTrack(i) {
+  if (tracks.length <= 1) return;
+  stopAll();
+  tracks.splice(i, 1);
+  items = items
+    .filter(it => it.track !== i)
+    .map(it => it.track > i ? { ...it, track: it.track - 1 } : it);
+  selected = new Set([...selected].filter(id => items.some(it => it.id === id)));
+  if (selectedTrack === i) selectedTrack = null;
+  else if (selectedTrack != null && selectedTrack > i) selectedTrack--;
+  const g = trackGains.splice(i, 1)[0];
+  if (g) g.disconnect();
+  syncGains();
+  renderAll();
+  persistCurrent(); commitHistory();
+}
+
 document.getElementById("addTrack").addEventListener("click", () => {
   if (tracks.length >= 10) return;
   tracks.push(newTrack(tracks.length + 1));
-  syncGains(); renderAll(); persistCurrent();
+  syncGains(); renderAll(); persistCurrent(); commitHistory();
 });
 document.getElementById("clear").addEventListener("click", () => {
-  stopAll(); items = []; selected = null; playhead = 0;
-  renderAll(); persistCurrent();
+  stopAll(); items = []; selected.clear(); playhead = 0;
+  renderAll(); persistCurrent(); commitHistory();
 });
 
 /* ============ keyboard ============ */
@@ -1071,16 +1295,34 @@ window.addEventListener("keydown", e => {
   if (e.code === "Space") {
     e.preventDefault();
     if (playing) stopAll(); else startAt(playhead);
-  } else if ((e.key === "Delete" || e.key === "Backspace") && selected != null) {
-    e.preventDefault(); removeItem(selected);
+  } else if ((e.key === "Delete" || e.key === "Backspace") && selected.size) {
+    e.preventDefault(); removeSelected();
+  } else if ((e.key === "d" || e.key === "D") && (e.ctrlKey || e.metaKey)) {
+    e.preventDefault(); duplicateSelected();
+  } else if ((e.key === "c" || e.key === "C") && (e.ctrlKey || e.metaKey)) {
+    e.preventDefault(); copySelected();
+  } else if ((e.key === "v" || e.key === "V") && (e.ctrlKey || e.metaKey)) {
+    e.preventDefault(); pasteClipboard();
+  } else if ((e.key === "z" || e.key === "Z") && (e.ctrlKey || e.metaKey) && !e.shiftKey) {
+    e.preventDefault(); undo();
+  } else if (((e.key === "z" || e.key === "Z") && (e.ctrlKey || e.metaKey) && e.shiftKey) ||
+             ((e.key === "y" || e.key === "Y") && (e.ctrlKey || e.metaKey))) {
+    e.preventDefault(); redo();
+  } else if (e.key === "t" || e.key === "T") {
+    e.preventDefault(); setRazor(!razorMode);
   } else if (e.key === "Escape") {
-    selected = null; markSelection();
+    if (razorMode) setRazor(false);
+    selected.clear(); markSelection();
+    selectedTrack = null; markTrackSelection();
   } else if (e.key === "ArrowLeft" || e.key === "ArrowRight") {
-    if (selected == null) return;
+    if (!selected.size) return;
     e.preventDefault();
-    const it = items.find(i => i.id === selected); if (!it) return;
     const d = (e.shiftKey ? 1 : 0.1) * (e.key === "ArrowLeft" ? -1 : 1);
-    it.start = Math.max(0, it.start + d);
+    selected.forEach(id => {
+      const it = items.find(i => i.id === id);
+      if (it) it.start = Math.max(0, it.start + d);
+    });
+    nudged = true;
     renderItems(); renderTimes(); persistCurrent();
   } else if (e.key === "-" || e.key === "_") {
     e.preventDefault(); setZoom(pxs / 1.6);
@@ -1089,8 +1331,14 @@ window.addEventListener("keydown", e => {
   } else if (e.key === "0") {
     e.preventDefault(); zoomToRange(0, contentEnd() || 60, 0.02);
   } else if (e.key === "z" || e.key === "Z") {
-    const it = items.find(i => i.id === selected);
-    if (it) { e.preventDefault(); zoomToRange(it.start, it.start + it.dur, 0.15); }
+    const r = selectedRange();
+    if (r) { e.preventDefault(); zoomToRange(r.start, r.end, 0.15); }
+  }
+});
+window.addEventListener("keyup", e => {
+  if ((e.key === "ArrowLeft" || e.key === "ArrowRight") && nudged) {
+    nudged = false;
+    commitHistory();
   }
 });
 
@@ -1114,8 +1362,10 @@ function restore(d) {
   items = (d.items || []).filter(i => i.clip >= 0 && i.clip < CLIPS.length && i.track < tracks.length);
   uid = Math.max(1, ...items.map(i => i.id + 1));
   if (d.pxs) pxs = d.pxs;
-  selected = null;
+  selected = new Set();
+  selectedTrack = null;
   syncGains(); renderAll();
+  resetHistory();
 }
 
 /* If the Netlify Function is deployed, sequences live on the site and everyone
@@ -1220,6 +1470,50 @@ function persistCurrent() {
   persistT = setTimeout(() => store.set(KEY + ":current", JSON.stringify(snapshot())), 400);
 }
 
+/* ============ undo / redo ============ */
+const HISTORY_MAX = 100;
+let history = [];
+let historyIndex = -1;
+
+function historySnapshot() {
+  return { tracks: JSON.parse(JSON.stringify(tracks)), items: JSON.parse(JSON.stringify(items)), uid };
+}
+function resetHistory() {
+  history = [historySnapshot()];
+  historyIndex = 0;
+  updateHistoryButtons();
+}
+function commitHistory() {
+  history = history.slice(0, historyIndex + 1);
+  history.push(historySnapshot());
+  if (history.length > HISTORY_MAX) history.shift();
+  historyIndex = history.length - 1;
+  updateHistoryButtons();
+}
+function applyHistory() {
+  stopAll();
+  const snap = history[historyIndex];
+  tracks = JSON.parse(JSON.stringify(snap.tracks));
+  items = JSON.parse(JSON.stringify(snap.items));
+  uid = snap.uid;
+  selected = new Set();
+  selectedTrack = selectedTrack != null && selectedTrack < tracks.length ? selectedTrack : null;
+  trackGains.forEach(g => g.disconnect());
+  trackGains = [];
+  syncGains();
+  renderAll();
+  persistCurrent();
+  updateHistoryButtons();
+}
+function undo() { if (historyIndex > 0) { historyIndex--; applyHistory(); } }
+function redo() { if (historyIndex < history.length - 1) { historyIndex++; applyHistory(); } }
+function updateHistoryButtons() {
+  document.getElementById("undo").disabled = historyIndex <= 0;
+  document.getElementById("redo").disabled = historyIndex >= history.length - 1;
+}
+document.getElementById("undo").addEventListener("click", undo);
+document.getElementById("redo").addEventListener("click", redo);
+
 /* ============ export mix to WAV ============ */
 document.getElementById("export").addEventListener("click", async () => {
   const btn = document.getElementById("export");
@@ -1287,6 +1581,7 @@ window.addEventListener("resize", () => {
     const cur = JSON.parse(await store.get(KEY + ":current") || "null");
     if (cur && cur.items && cur.items.length) restore(cur);
   } catch (_) {}
+  resetHistory();
   renderTimes();
 })();
 </script>
