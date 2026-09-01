@@ -76,6 +76,12 @@ button{cursor:pointer}
   border-radius:4px;width:22px;height:20px;font-size:11px;font-weight:600;line-height:1;padding:0;
 }
 .mute[aria-pressed="true"]{background:var(--danger);border-color:var(--danger);color:#fff}
+.trk-x{
+  border:1px solid var(--rule);background:transparent;color:var(--ink-2);
+  border-radius:4px;width:20px;height:20px;font-size:13px;line-height:1;padding:0;flex-shrink:0;
+}
+.trk-x:hover{background:var(--danger);border-color:var(--danger);color:#fff}
+.trk-x:disabled{opacity:.35;cursor:not-allowed;background:transparent;color:var(--ink-2)}
 
 .lanes-wrap{overflow:auto;position:relative;background:var(--surface)}
 .lanes{position:relative;min-height:100%}
@@ -115,6 +121,7 @@ button{cursor:pointer}
 .grip{position:absolute;top:0;bottom:0;width:8px;cursor:ew-resize;touch-action:none}
 .grip.l{left:0} .grip.r{right:0}
 .item:hover .grip{background:rgba(0,0,0,.13)}
+.lanes.razor .item{cursor:crosshair}
 
 /* ---------- control bar ---------- */
 .bar{display:flex;gap:10px;flex-wrap:wrap;align-items:stretch}
@@ -165,7 +172,12 @@ select{min-width:150px}
 }
 .tile:hover{border-color:rgba(0,0,0,.4)}
 .tile canvas{display:block;width:100%;height:100%}
-.tile-meta{position:absolute;inset:auto 7px 5px 7px;display:flex;justify-content:space-between;font-size:11px;font-weight:600;color:rgba(0,0,0,.72);pointer-events:none}
+.tile-meta{position:absolute;inset:auto 7px 5px 7px;display:flex;justify-content:flex-end;pointer-events:none}
+.tile-meta span:last-child{
+  font-size:11px;font-weight:600;color:rgba(0,0,0,.75);
+  background:rgba(255,255,255,.72);padding:2px 8px;border-radius:999px;
+  box-shadow:0 1px 1px rgba(0,0,0,.06);
+}
 .tile-name{
   position:absolute;left:6px;top:5px;max-width:calc(100% - 12px);
   font-size:11px;font-weight:600;color:rgba(0,0,0,.75);
@@ -236,6 +248,7 @@ select{min-width:150px}
       <span class="vsep"></span>
       <label class="tog"><input type="checkbox" id="snap" checked> Snap</label>
       <label class="tog"><input type="checkbox" id="follow" checked> Follow</label>
+      <button class="btn icon" id="razor" title="Razor: click a clip to cut it there (C)" aria-pressed="false">✂</button>
       <span class="vsep"></span>
       <span class="zoom">
         <button class="btn icon" id="zout" title="Zoom out (−)">−</button>
@@ -268,7 +281,7 @@ select{min-width:150px}
       <p id="libHint">Drag a clip onto a track. Click one to preview it.</p>
     </div>
     <div class="grid" id="grid"></div>
-    <p class="hint" style="margin-top:11px">Drag a clip's left or right edge to trim it. Select and press Delete to remove it. Space plays and pauses. Zoom with − and +, scroll, or 0 to fit; Z zooms to the selected clip. Shift+scroll to see more tracks.</p>
+    <p class="hint" style="margin-top:11px">Drag a clip's left or right edge to trim it. Select and press Delete to remove it, or Ctrl+D to duplicate it right after itself. Toggle the razor (✂ or C) and click a clip to cut it into two there. Space plays and pauses. Zoom with − and +, scroll, or 0 to fit; Z zooms to the selected clip. Shift+scroll to see more tracks.</p>
   </section>
 </div>
 
@@ -294,15 +307,15 @@ const CLIPS = [
   ["fizgets_nepala-003.mp3",  95.033],
   ["fizgets_nepala-004.mp3",  25.548],
   ["fizgets_nepala-005.mp3",  69.538],
-  ["fizgets_nepala-006.mp3",  92.029],
+  ["fizgets_nepala-006.mp3",  92.029, "Maris Olte"],
   ["fizgets_nepala-007.mp3",  50.051],
   ["fizgets_nepala-008.mp3",  38.348],
   ["fizgets_nepala-009.mp3",  60.343],
-  ["fizgets_nepala-010.mp3",  98.038],
+  ["fizgets_nepala-010.mp3",  98.038, "Robopazuzu"],
   ["fizgets_nepala-011.mp3", 101.538],
   ["fizgets_nepala-012.mp3", 124.029],
-  ["fizgets_nepala-013.mp3", 102.165, "Weezer"],
-  ["fizgets_nepala-014.mp3", 172.904],
+  ["fizgets_nepala-013.mp3", 102.165],
+  ["fizgets_nepala-014.mp3", 172.904, "Weezer"],
 ].map(([file, dur, name], i) => ({
   i, file, dur,
   label: name || "Clip " + String(i + 1).padStart(2, "0"),
@@ -320,6 +333,7 @@ let pxs = 3;                 // pixels per second
 let playhead = 0;
 let selected = null;
 let looping = false;
+let razorMode = false;
 const LANE_PAD = 0;
 
 function newTrack(n) { return { name: "Track " + n, gain: 0.85, mute: false }; }
@@ -629,11 +643,13 @@ function renderHeads() {
     d.className = "head";
     d.innerHTML =
       '<div class="head-top"><span class="head-name">' + t.name + '</span>' +
-      '<button class="mute" aria-pressed="' + t.mute + '" title="Mute this track">M</button></div>' +
+      '<button class="mute" aria-pressed="' + t.mute + '" title="Mute this track">M</button>' +
+      '<button class="trk-x" title="Remove this track"' + (tracks.length <= 1 ? " disabled" : "") + '>×</button></div>' +
       '<input type="range" min="0" max="1.2" step="0.01" value="' + t.gain + '" aria-label="' + t.name + ' volume">';
     d.querySelector(".mute").addEventListener("click", e => {
       t.mute = !t.mute; e.currentTarget.setAttribute("aria-pressed", t.mute); syncGains(); persistCurrent();
     });
+    d.querySelector(".trk-x").addEventListener("click", () => removeTrack(i));
     d.querySelector("input").addEventListener("input", e => {
       t.gain = +e.target.value; syncGains(); persistCurrent();
     });
@@ -776,6 +792,11 @@ lanes.addEventListener("pointerdown", e => {
   }
   const el = e.target.closest(".item"); if (!el) return;
   const it = items.find(i => i.id === +el.dataset.id); if (!it) return;
+  if (razorMode) {
+    e.preventDefault();
+    splitItemAt(it.id, timeAt(e.clientX));
+    return;
+  }
   selected = it.id;
   markSelection();
   const grip = e.target.classList.contains("grip") ? (e.target.classList.contains("l") ? "l" : "r") : null;
@@ -887,6 +908,42 @@ function removeItem(id) {
   if (selected === id) selected = null;
   renderRuler(); renderItems(); renderLanes2(); renderTimes(); persistCurrent();
 }
+function duplicateItem(id) {
+  const it = items.find(i => i.id === id); if (!it) return;
+  const copy = {
+    id: uid++, clip: it.clip, track: it.track,
+    start: it.start + it.dur, offset: it.offset, dur: it.dur, pending: it.pending,
+  };
+  items.push(copy);
+  selected = copy.id;
+  renderRuler(); renderItems(); renderLanes2(); renderTimes(); persistCurrent();
+}
+
+/* razor: cut one clip into two at time t, keeping each half's trim intact */
+const RAZOR_MIN = 0.1;
+function splitItemAt(id, t) {
+  const it = items.find(i => i.id === id); if (!it) return null;
+  if (it.dur < RAZOR_MIN * 2) return null;
+  const cut = Math.max(it.start + RAZOR_MIN, Math.min(t, it.start + it.dur - RAZOR_MIN));
+  const leftDur = cut - it.start;
+  const right = {
+    id: uid++, clip: it.clip, track: it.track,
+    start: cut, offset: it.offset + leftDur, dur: it.dur - leftDur, pending: it.pending,
+  };
+  it.dur = leftDur;
+  items.push(right);
+  selected = right.id;
+  renderRuler(); renderItems(); renderLanes2(); renderTimes(); persistCurrent();
+  return right;
+}
+
+function setRazor(v) {
+  razorMode = v;
+  document.getElementById("razor").setAttribute("aria-pressed", razorMode);
+  document.getElementById("razor").classList.toggle("live", razorMode);
+  lanes.classList.toggle("razor", razorMode);
+}
+document.getElementById("razor").addEventListener("click", () => setRazor(!razorMode));
 
 /* ============ ruler scrubbing ============ */
 function scrubTo(clientX) {
@@ -1062,6 +1119,21 @@ function followPlayhead() {
   }
 }
 
+function removeTrack(i) {
+  if (tracks.length <= 1) return;
+  stopAll();
+  tracks.splice(i, 1);
+  items = items
+    .filter(it => it.track !== i)
+    .map(it => it.track > i ? { ...it, track: it.track - 1 } : it);
+  if (selected != null && !items.find(it => it.id === selected)) selected = null;
+  const g = trackGains.splice(i, 1)[0];
+  if (g) g.disconnect();
+  syncGains();
+  renderAll();
+  persistCurrent();
+}
+
 document.getElementById("addTrack").addEventListener("click", () => {
   if (tracks.length >= 10) return;
   tracks.push(newTrack(tracks.length + 1));
@@ -1081,7 +1153,13 @@ window.addEventListener("keydown", e => {
     if (playing) stopAll(); else startAt(playhead);
   } else if ((e.key === "Delete" || e.key === "Backspace") && selected != null) {
     e.preventDefault(); removeItem(selected);
+  } else if ((e.key === "d" || e.key === "D") && (e.ctrlKey || e.metaKey)) {
+    e.preventDefault();
+    if (selected != null) duplicateItem(selected);
+  } else if (e.key === "c" || e.key === "C") {
+    e.preventDefault(); setRazor(!razorMode);
   } else if (e.key === "Escape") {
+    if (razorMode) setRazor(false);
     selected = null; markSelection();
   } else if (e.key === "ArrowLeft" || e.key === "ArrowRight") {
     if (selected == null) return;

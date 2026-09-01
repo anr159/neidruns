@@ -22,11 +22,20 @@ and down to change track. Drag its left or right edge to trim. With Snap on,
 clips pull to the grid and to the edges of their neighbours. Select a clip and
 press Delete to remove it, or use the × in its corner.
 
+**Cutting.** Toggle the razor (✂ button or `C`) and click anywhere on a clip to
+cut it into two independent clips at that point, each keeping its own trim.
+The razor stays on until you toggle it off again, so you can make several cuts
+in a row.
+
 **Playing.** Space plays and pauses. Click the ruler to move the playhead or
 scrub. With Follow on, the view scrolls to keep the playhead visible.
 
 **Volume.** Each track has a slider and a mute button next to its name; the
 master slider is top right.
+
+**Tracks.** "Add track" appends one, up to 10. The × next to a track's name
+removes it, along with anything placed on it; the last remaining track can't be
+removed.
 
 **Exporting.** "Export mix" renders the arrangement offline and downloads it as
 a WAV.
@@ -37,6 +46,8 @@ a WAV.
 | --- | --- |
 | `Space` | Play / pause |
 | `Delete` / `Backspace` | Remove the selected clip |
+| `Ctrl`/`Cmd` + `D` | Duplicate the selected clip, placed right after itself |
+| `C` | Toggle the razor tool |
 | `←` `→` | Nudge the selected clip by 0.1s (hold Shift for 1s) |
 | `Esc` | Deselect |
 | `−` `+` | Zoom out / in |
