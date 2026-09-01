@@ -20,9 +20,13 @@ begin playback.
 **Arranging.** Drag a clip on the timeline sideways to move it in time, or up
 and down to change track. Drag its left or right edge to trim. With Snap on,
 clips pull to the grid and to the edges of their neighbours. Select a clip and
-press Delete to remove it, or use the × in its corner.
+press Delete to remove it, or use the × in its corner. Shift+click to select
+several clips at once; Delete, Ctrl+D and Ctrl+C/Ctrl+V then act on all of
+them. Pasted clips land at the playhead, keeping their relative timing and
+tracks from when they were copied — unless a track is selected (below), in
+which case they paste onto that track instead.
 
-**Cutting.** Toggle the razor (✂ button or `C`) and click anywhere on a clip to
+**Cutting.** Toggle the razor (✂ button or `T`) and click anywhere on a clip to
 cut it into two independent clips at that point, each keeping its own trim.
 The razor stays on until you toggle it off again, so you can make several cuts
 in a row.
@@ -35,7 +39,15 @@ master slider is top right.
 
 **Tracks.** "Add track" appends one, up to 10. The × next to a track's name
 removes it, along with anything placed on it; the last remaining track can't be
-removed.
+removed. Click elsewhere on a track's head to select it as the paste target —
+handy for copying clips from one track and pasting them onto another. Click it
+again (or press Esc) to go back to pasting onto each clip's original track.
+
+**Undo / redo.** The ↶ / ↷ buttons (or Ctrl+Z / Ctrl+Shift+Z, Ctrl+Y also works)
+step back and forward through edits — adding, moving, trimming, cutting,
+duplicating, pasting, and track changes including mute and volume. History is
+capped at 100 steps and resets whenever a saved sequence is loaded; playback
+stops when you undo or redo, since the clips underneath may have changed.
 
 **Exporting.** "Export mix" renders the arrangement offline and downloads it as
 a WAV.
@@ -45,14 +57,18 @@ a WAV.
 | Key | Action |
 | --- | --- |
 | `Space` | Play / pause |
-| `Delete` / `Backspace` | Remove the selected clip |
-| `Ctrl`/`Cmd` + `D` | Duplicate the selected clip, placed right after itself |
-| `C` | Toggle the razor tool |
-| `←` `→` | Nudge the selected clip by 0.1s (hold Shift for 1s) |
+| `Shift` + click a clip | Add / remove that clip from the selection |
+| `Delete` / `Backspace` | Remove the selected clip(s) |
+| `Ctrl`/`Cmd` + `D` | Duplicate the selected clip(s), each placed right after itself |
+| `Ctrl`/`Cmd` + `C` / `V` | Copy the selected clip(s) / paste at the playhead |
+| `Ctrl`/`Cmd` + `Z` | Undo |
+| `Ctrl`/`Cmd` + `Shift` + `Z` (or `Ctrl`/`Cmd` + `Y`) | Redo |
+| `T` | Toggle the razor tool |
+| `←` `→` | Nudge the selected clip(s) by 0.1s (hold Shift for 1s) |
 | `Esc` | Deselect |
 | `−` `+` | Zoom out / in |
 | `0` | Fit everything |
-| `Z` | Zoom to the selected clip |
+| `Z` | Zoom to the selection |
 | scroll | Zoom at the pointer (`Ctrl`/pinch also works) |
 | `Shift` + scroll | Pan vertically between tracks |
 | trackpad horizontal swipe | Pan sideways |
