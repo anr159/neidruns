@@ -1450,17 +1450,18 @@ document.getElementById("seqSel").addEventListener("change", e => {
 document.getElementById("del").addEventListener("click", async () => {
   const sel = document.getElementById("seqSel");
   const n = sel.value; if (!n) return;
-  delete library[n];
   if (apiBase) {
     try {
       const r = await fetch(apiBase + "?name=" + encodeURIComponent(n), { method: "DELETE" });
       if (!r.ok) throw new Error("HTTP " + r.status);
+      setStoreNote("shared with everyone on this site");
     } catch (e) {
       setStoreNote("site delete failed, try again");
+      return;
     }
-  } else {
-    await saveLocal();
   }
+  delete library[n];
+  if (!apiBase) await saveLocal();
   fillSelect(); sel.value = "";
 });
 
